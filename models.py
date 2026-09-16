@@ -13,7 +13,7 @@ class User(Base):
     password = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
     
-    class Question(Base):
+class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -22,7 +22,7 @@ class User(Base):
     difficulty = Column(String)
     topic = Column(String)
     
-    class Submission(Base):
+class Submission(Base):
     __tablename__ = "submissions"
 
     id = Column(Integer, primary_key=True, index=True)
