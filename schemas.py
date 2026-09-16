@@ -14,3 +14,10 @@ class QuestionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+        
+class QuestionCreate(BaseModel):
+    title: str
+    description: str
+    difficulty: str
+    topic: str
