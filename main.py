@@ -13,6 +13,9 @@ from fastapi import Depends
 
 from passlib.context import CryptContext
 
+from models import Submission
+from schemas import SubmissionCreate
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 Base.metadata.create_all(bind=engine)
@@ -59,3 +62,16 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
     if not user or not pwd_context.verify(password, user.password):
         return {"error": "Invalid email or password"}
     return {"message": "Login successful", "user_id": user.id}
+
+@app.post("/submissions")
+def create_submission(submission: SubmissionCreate, db: Session = Depends(get_db)):
+    new_submission = Submission(
+        user_id=submission.user_id,
+        question_id=submission.question_id,
+        submitted_query=submission.submitted_query,
+        is_correct=0
+    )
+    db.add(new_submission)
+    db.commit()
+    db.refresh(new_submission)
+    return {"message": "Submission recorded", "submission_id": new_submission.id}

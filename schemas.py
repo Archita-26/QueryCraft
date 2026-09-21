@@ -21,3 +21,9 @@ class QuestionCreate(BaseModel):
     description: str
     difficulty: str
     topic: str
+    
+    
+class SubmissionCreate(BaseModel):
+    user_id: int
+    question_id: int
+    submitted_query: str
