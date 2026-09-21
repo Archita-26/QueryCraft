@@ -11,6 +11,10 @@ from typing import List
 
 from fastapi import Depends
 
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 Base.metadata.create_all(bind=engine)
 def get_db():
     db = SessionLocal()
@@ -36,3 +40,15 @@ def create_question(question: QuestionCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_question)
     return new_question
+
+from models import User
+from schemas import UserCreate
+
+@app.post("/signup")
+def signup(user: UserCreate, db: Session = Depends(get_db)):
+    hashed_password = pwd_context.hash(user.password)
+    new_user = User(name=user.name, email=user.email, password=hashed_password)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message": "User created successfully", "user_id": new_user.id}
