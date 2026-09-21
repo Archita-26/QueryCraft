@@ -52,3 +52,10 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return {"message": "User created successfully", "user_id": new_user.id}
+
+@app.post("/login")
+def login(email: str, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not pwd_context.verify(password, user.password):
+        return {"error": "Invalid email or password"}
+    return {"message": "Login successful", "user_id": user.id}
