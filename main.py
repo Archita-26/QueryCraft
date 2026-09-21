@@ -16,6 +16,8 @@ from passlib.context import CryptContext
 from models import Submission
 from schemas import SubmissionCreate
 
+from sqlalchemy import text
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 Base.metadata.create_all(bind=engine)
@@ -75,3 +77,14 @@ def create_submission(submission: SubmissionCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(new_submission)
     return {"message": "Submission recorded", "submission_id": new_submission.id}
+
+@app.post("/run-query")
+def run_query(query: str, db: Session = Depends(get_db)):
+    if not query.strip().lower().startswith("select"):
+        return {"error": "Only SELECT queries are allowed"}
+    try:
+        result = db.execute(text(query))
+        rows = [dict(row._mapping) for row in result]
+        return {"result": rows}
+    except Exception as e:
+        return {"error": str(e)}
