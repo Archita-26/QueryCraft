@@ -21,6 +21,7 @@ class Question(Base):
     description = Column(String)
     difficulty = Column(String)
     topic = Column(String)
+    expected_query = Column(String)
     
 class Submission(Base):
     __tablename__ = "submissions"
