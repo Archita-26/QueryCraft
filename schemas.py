@@ -21,6 +21,7 @@ class QuestionCreate(BaseModel):
     description: str
     difficulty: str
     topic: str
+    expected_query: str
     
     
 class SubmissionCreate(BaseModel):

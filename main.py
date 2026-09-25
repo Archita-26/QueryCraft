@@ -67,16 +67,29 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
 
 @app.post("/submissions")
 def create_submission(submission: SubmissionCreate, db: Session = Depends(get_db)):
+    question = db.query(Question).filter(Question.id == submission.question_id).first()
+    if not question:
+        return {"error": "Question not found"}
+
+    is_correct = 0
+    try:
+        user_result = db.execute(text(submission.submitted_query)).fetchall()
+        correct_result = db.execute(text(question.expected_query)).fetchall()
+        if set(map(tuple, user_result)) == set(map(tuple, correct_result)):
+            is_correct = 1
+    except Exception as e:
+        return {"error": str(e)}
+
     new_submission = Submission(
         user_id=submission.user_id,
         question_id=submission.question_id,
         submitted_query=submission.submitted_query,
-        is_correct=0
+        is_correct=is_correct
     )
     db.add(new_submission)
     db.commit()
     db.refresh(new_submission)
-    return {"message": "Submission recorded", "submission_id": new_submission.id}
+    return {"message": "Submission checked", "is_correct": bool(is_correct)}
 
 @app.post("/run-query")
 def run_query(query: str, db: Session = Depends(get_db)):
