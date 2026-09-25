@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QueryCraft - Practice</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0f172a;
+        color: white;
+      }
+      header {
+        padding: 20px 40px;
+        background: #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        color: #38bdf8;
+      }
+      nav a {
+        color: white;
+        margin-left: 20px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .container {
+        padding: 40px;
+      }
+      .filters {
+        margin-bottom: 20px;
+      }
+      .filters select {
+        padding: 8px;
+        margin-right: 10px;
+        border-radius: 4px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #334155;
+      }
+      th {
+        background: #1e293b;
+      }
+      tr:hover {
+        background: #1e293b;
+        cursor: pointer;
+      }
+      .badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .Easy {
+        background: #166534;
+      }
+      .Medium {
+        background: #854d0e;
+      }
+      .Hard {
+        background: #7f1d1d;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>QueryCraft</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <div class="container">
+      <h2>Practice Questions</h2>
+      <div class="filters">
+        <select id="topicFilter">
+          <option value="">All Topics</option>
+        </select>
+        <select id="difficultyFilter">
+          <option value="">All Difficulty</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Hard">Hard</option>
+        </select>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Topic</th>
+            <th>Difficulty</th>
+          </tr>
+        </thead>
+        <tbody id="questionsList">
+          <!-- Questions will load here -->
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+      fetch("http://127.0.0.1:8000/questions")
+        .then((res) => res.json())
+        .then((data) => {
+          const list = document.getElementById("questionsList");
+          data.forEach((q) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${q.title}</td><td>${q.topic}</td><td><span class="badge ${q.difficulty}">${q.difficulty}</span></td>`;
+            row.onclick = () =>
+              (window.location.href = `editor.html?id=${q.id}`);
+            list.appendChild(row);
+          });
+        });
+    </script>
+  </body>
+</html>
