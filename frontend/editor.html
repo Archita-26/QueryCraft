@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QueryCraft - Editor</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        background: #0f172a;
+        color: white;
+      }
+      header {
+        padding: 20px 40px;
+        background: #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        color: #38bdf8;
+      }
+      nav a {
+        color: white;
+        margin-left: 20px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .container {
+        padding: 40px;
+        display: flex;
+        gap: 30px;
+      }
+      .left,
+      .right {
+        flex: 1;
+      }
+      .question-box {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      textarea {
+        width: 100%;
+        height: 150px;
+        background: #1e293b;
+        color: #38bdf8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 14px;
+      }
+      .btn {
+        background: #38bdf8;
+        color: #0f172a;
+        padding: 10px 25px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      .result-box {
+        background: #1e293b;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        max-height: 300px;
+        overflow: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th,
+      td {
+        padding: 8px;
+        border: 1px solid #334155;
+        text-align: left;
+      }
+      .correct {
+        color: #22c55e;
+        font-weight: bold;
+      }
+      .incorrect {
+        color: #ef4444;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>QueryCraft</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="questions.html">Practice</a>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div class="left">
+        <div class="question-box">
+          <h2 id="qTitle">Loading...</h2>
+          <p id="qDesc"></p>
+          <p>
+            <b>Topic:</b> <span id="qTopic"></span> | <b>Difficulty:</b>
+            <span id="qDifficulty"></span>
+          </p>
+        </div>
+      </div>
+
+      <div class="right">
+        <h3>Write your query</h3>
+        <textarea
+          id="queryInput"
+          placeholder="SELECT * FROM employees"
+        ></textarea>
+        <br />
+        <button class="btn" onclick="runQuery()">Run Query</button>
+        <button class="btn" onclick="submitQuery()" style="background: #22c55e">
+          Submit Answer
+        </button>
+
+        <div class="result-box">
+          <h4>Result:</h4>
+          <div id="resultArea">Run a query to see results</div>
+        </div>
+        <div id="submitResult"></div>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const questionId = params.get("id");
+
+      fetch(`http://127.0.0.1:8000/questions`)
+        .then((res) => res.json())
+        .then((data) => {
+          const q = data.find((x) => x.id == questionId);
+          if (q) {
+            document.getElementById("qTitle").innerText = q.title;
+            document.getElementById("qDesc").innerText = q.description;
+            document.getElementById("qTopic").innerText = q.topic;
+            document.getElementById("qDifficulty").innerText = q.difficulty;
+          }
+        });
+
+      function runQuery() {
+        const query = document.getElementById("queryInput").value;
+        fetch(
+          `http://127.0.0.1:8000/run-query?query=${encodeURIComponent(query)}`,
+          { method: "POST" },
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            const area = document.getElementById("resultArea");
+            if (data.error) {
+              area.innerHTML = `<p style="color:#ef4444">${data.error}</p>`;
+              return;
+            }
+            if (data.result.length === 0) {
+              area.innerHTML = "No rows returned";
+              return;
+            }
+            let html = "<table><tr>";
+            Object.keys(data.result[0]).forEach(
+              (col) => (html += `<th>${col}</th>`),
+            );
+            html += "</tr>";
+            data.result.forEach((row) => {
+              html += "<tr>";
+              Object.values(row).forEach((val) => (html += `<td>${val}</td>`));
+              html += "</tr>";
+            });
+            html += "</table>";
+            area.innerHTML = html;
+          });
+      }
+
+      function submitQuery() {
+        const query = document.getElementById("queryInput").value;
+        fetch(`http://127.0.0.1:8000/submissions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_id: 1,
+            question_id: parseInt(questionId),
+            submitted_query: query,
+          }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            const box = document.getElementById("submitResult");
+            if (data.is_correct) {
+              box.innerHTML = `<p class="correct">✅ Correct Answer!</p>`;
+            } else {
+              box.innerHTML = `<p class="incorrect">❌ Incorrect, try again.</p>`;
+            }
+          });
+      }
+    </script>
+  </body>
+</html>
