@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>QueryCraft - Login</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: white; }
+  header { padding: 20px 40px; background: #1e293b; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { color: #38bdf8; }
+  nav a { color: white; margin-left: 20px; text-decoration: none; font-weight: bold; }
+  .form-box { max-width: 400px; margin: 60px auto; background: #1e293b; padding: 30px; border-radius: 10px; }
+  .form-box h2 { margin-top: 0; }
+  input { width: 100%; padding: 12px; margin: 8px 0 16px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+  .btn { width: 100%; background: #38bdf8; color: #0f172a; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
+  #msg { margin-top: 15px; font-weight: bold; }
+  a.link { color: #38bdf8; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>QueryCraft</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="questions.html">Practice</a>
+    <a href="signup.html">Sign Up</a>
+  </nav>
+</header>
+
+<div class="form-box">
+  <h2>Welcome Back</h2>
+  <label>Email</label>
+  <input type="email" id="email" placeholder="you@example.com">
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Your password">
+  <button class="btn" onclick="login()">Login</button>
+  <div id="msg"></div>
+  <p>New here? <a class="link" href="signup.html">Create an account</a></p>
+</div>
+
+<script>
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const msg = document.getElementById('msg');
+
+  if (!email || !password) {
+    msg.style.color = '#ef4444';
+    msg.innerText = 'Please enter email and password';
+    return;
+  }
+
+  try {
+    const url = `http://127.0.0.1:8000/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+    const res = await fetch(url, { method: 'POST' });
+    const data = await res.json();
+
+    if (data.error) {
+      msg.style.color = '#ef4444';
+      msg.innerText = data.error;
+      return;
+    }
+
+    localStorage.setItem('user_id', data.user_id);
+    msg.style.color = '#22c55e';
+    msg.innerText = 'Login successful! Redirecting...';
+    setTimeout(() => window.location.href = 'questions.html', 1000);
+  } catch (err) {
+    msg.style.color = '#ef4444';
+    msg.innerText = 'Something went wrong. Is the server running?';
+  }
+}
+</script>
+
+</body>
+</html>
