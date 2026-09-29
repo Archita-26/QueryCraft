@@ -63,7 +63,8 @@ def login(email: str, password: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
     if not user or not pwd_context.verify(password, user.password):
         return {"error": "Invalid email or password"}
-    return {"message": "Login successful", "user_id": user.id}
+    return {"message": "Login successful", "user_id": user.id, "name": user.name}
+    
 
 @app.post("/submissions")
 def create_submission(submission: SubmissionCreate, db: Session = Depends(get_db)):
